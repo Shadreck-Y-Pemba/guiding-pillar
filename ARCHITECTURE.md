@@ -12,7 +12,7 @@ The system consists of a **mobile client app** (Flutter) and a **cloud backend &
 
 ```mermaid
 graph TD
-    A[Mosque Admin] -->|Updates via| B[Admin Web Portal];
+    
     A[Mosque Admin] -->|Updates via| B[Admin Web Portal]
     B -->|Writes to| C[(Firestore DB)]
     D[User Mobile App] -->|Reads from| C
