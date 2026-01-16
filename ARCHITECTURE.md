@@ -13,11 +13,11 @@ The system consists of a **mobile client app** (Flutter) and a **cloud backend &
 ```mermaid
 graph TD
     A[Mosque Admin] -->|Updates via| B[Admin Web Portal];
-    B -->|Writes to| C[(Firestore Database)];
+    B -->|Writes to| C[(Firestore DB)];
     D[User Mobile App] -->|Reads from| C;
-    D -->|Offline Cache| E[Local SQLite];
-    F[Aladhan API] -->|Fallback Data| D;
-    D -->|Uses| G[Maps Service];
+    D -->|Stores cache in| E[Local SQLite];
+    D -->|Gets fallback from| F[Aladhan API];
+    D -->|Displays map via| G[Maps Service];
 3. Key Components & Technical Decisions
 3.1. Data: The Hybrid Prayer Time Engine
 Primary Source: Firestore Database holding mosque profiles and verified prayer timetables submitted by admins.
@@ -90,3 +90,4 @@ Maps Provider: Final choice between Google Maps Platform and Mapbox (based on co
 SMS Verification: Need for low-tech phone number verification in areas with low email usage.
 
 Monetization Integration: Technical design for the "Featured Partner" badges and listings.
+
