@@ -10,9 +10,7 @@ Guiding Pillar is a community-powered platform to provide accurate, location-bas
 ## 2. High-Level System Overview
 The system consists of a **mobile client app** (Flutter) and a **cloud backend & database** (Firebase). Mosque data flows from verified admins to the cloud database, which is then delivered to users' apps.
 
-```mermaid
 graph TD
-    
     A[Mosque Admin] -->|Updates via| B[Admin Web Portal]
     B -->|Writes to| C[(Firestore DB)]
     D[User Mobile App] -->|Reads from| C
