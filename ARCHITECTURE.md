@@ -1,94 +1,96 @@
-# Guiding Pillar - System Architecture
-*Version 1.0 | Last Updated: 16 January 2026
+This is the corrected and refined version of your Guiding Pillar System Architecture document. I have fixed the Mermaid syntax, cleaned up the data models, and organized the roadmap into actionable steps.
 
-## 1. Core Vision & Principles
-Guiding Pillar is a community-powered platform to provide accurate, location-based mosque prayer times and Islamic connectivity. It is built on three core principles:
-*   **Utility First:** The app must work reliably everywhere, even without mosque data (via calculated fallback).
-*   **Trust Through Community:** Data accuracy is built via a verified network, not centralized control.
-*   **Offline-First Design:** Core features must function without an internet connection.
+Guiding Pillar - System Architecture
+Tagline: Locate. Connect. Belong.
 
-## 2. High-Level System Overview
-The system consists of a **mobile client app** (Flutter) and a **cloud backend & database** (Firebase). Mosque data flows from verified admins to the cloud database, which is then delivered to users' apps.
+Version: 1.0 | Updated: 16 January 2026
 
-```mermaid
+1. Core Vision & Principles
+Guiding Pillar is a community-powered platform providing accurate, location-based mosque prayer times and Islamic connectivity.
+
+Utility First: Reliable functionality with or without verified mosque data.
+
+Trust Through Community: Accuracy via a verified network and "Guardian" contributions.
+
+Offline-First Design: Core prayer times must function without an active data connection.
+
+2. High-Level System Overview
+The system utilizes a Flutter mobile client and a Firebase backend. Data flows from verified admins to the cloud, then synchronizes to the end-user's local cache.
+
+Code snippet
+
 graph TD
     A[Mosque Admin] -->|Updates via| B[Admin Web Portal]
     B -->|Writes to| C[(Firestore DB)]
     D[User Mobile App] -->|Reads from| C
     D -->|Stores cache in| E[Local SQLite]
     D -->|Gets fallback from| F[Aladhan API]
-    D -->|Displays map via| G[Maps Service] 
-    ```mermaid
+    D -->|Displays map via| G[Maps Service]
 3. Key Components & Technical Decisions
-3.1. Data: The Hybrid Prayer Time Engine
-Primary Source: Firestore Database holding mosque profiles and verified prayer timetables submitted by admins.
+3.1. The Hybrid Prayer Time Engine
+Primary: Firestore DB (Verified mosque-specific times).
 
-Fallback Source: Aladhan API provides calculated times when verified data is unavailable.
+Secondary: Community "Guardian" suggestions (unverified but recent).
 
-Client Logic: The app uses a decision function (see getPrayerTimes() in planning) to choose the best available source.
+Fallback: Aladhan API (Mathematical calculations based on GPS coordinates).
 
-Offline Cache: Recent data is persisted locally using SQLite to ensure functionality without internet.
+Local Storage: SQLite (Persists the last known good data for offline use).
 
-3.2. Users & Permissions: The Trust Model
-The system defines three main user roles with distinct permissions:
+3.2. User Roles & Permissions
+Standard User: View times, info, and submit "Guardian" time suggestions.
 
-Standard User: Can view prayer times, mosque info, and submit time suggestions as a "Guardian."
+Mosque Admin (Verified): Manage mosque profile, set official timetables, and generate "Share to WhatsApp" images.
 
-Mosque Admin (Verified): Can claim and manage a mosque profile, set official timetables, and view basic analytics. Verified via a "Trusted Trustee" (e.g., national body) or direct contact proof.
+Trusted Trustee: (e.g., Muslim Association of Malawi) High-level access to verify mosque admins within their jurisdiction.
 
-Super Admin/Trusted Trustee: (e.g., Muslim Association of Malawi) Can verify multiple mosque admins within their network.
-
-3.3. Backend: Firebase Services
-Authentication (Firebase Auth): Manages user logins for admins and guardians.
-
-Database (Cloud Firestore): NoSQL database storing all structured data (Mosques, Users, Schedules).
-
-Hosting (Firebase Hosting): Will host the Admin Web Portal.
-
-3.4. Admin Web Portal
-A responsive web application (built with Flutter Web or a simple framework) where mosque admins log in to update their mosque's data, including the crucial "Share to WhatsApp" image generator.
-
-4. Data Models (Initial Schema)
-The core data structures in Firestore will be:
-
+4. Data Models (Firestore Schema)
 Collection: mosques
+JSON
 
-javascript
 {
-  mosqueId: "auto-generated-id",
-  name: "Masjid al-Noor",
-  location: { geoPoint, address },
-  contact: { phone, email },
-  // TIMETABLES: The most critical data
-  verifiedTimetable: { fajr: "04:30", dhuhr: "13:15", ... },
-  lastUpdated: "timestamp",
-  verifiedBy: "adminUserId | trusteeOrgName",
-  // Status flags for the app's badge system
-  dataSource: "verified | community | calculated",
-  guardianSuggestions: [ {time: "...", userId: "...", votes: 3}, ... ]
+  "mosqueId": "id_123",
+  "name": "Masjid al-Noor",
+  "location": {
+    "lat": -14.28,
+    "lng": 35.26,
+    "address": "Namwera, Mangochi"
+  },
+  "verifiedTimetable": {
+    "fajr": "04:30",
+    "dhuhr": "13:15",
+    "asr": "16:45",
+    "maghrib": "18:20",
+    "isha": "19:45"
+  },
+  "lastUpdated": "2026-01-16T09:00:00Z",
+  "dataSource": "verified", 
+  "guardianSuggestions": [
+    { "time": "04:35", "userId": "user_456", "votes": 3 }
+  ]
 }
 Collection: users
+JSON
 
-javascript
 {
-  userId: "from-firebase-auth",
-  email: "user@example.com",
-  role: "user | guardian | admin | trustee",
-  associatedMosqueId: "reference-to-mosque" // for admins/guardians
+  "userId": "auth_id_99",
+  "email": "shadreckyasidu16@gmail.com",
+  "role": "admin",
+  "associatedMosqueId": "id_123"
 }
-5. Implementation Roadmap (Phases)
-Phase 0 - Foundation (Current): Repository, legal docs, architecture. ✅
+5. Implementation Roadmap
+Step 1: Environment Setup
+Initialize Flutter project with flutter_bloc or provider for state management.
 
-Phase 1 - Core App: Flutter app with Hybrid Engine, offline cache, basic map. (Next)
+Configure Firebase Project (Auth, Firestore, Hosting).
 
-Phase 2 - Admin System: Firebase setup, Auth, Admin Portal for time updates.
+Install dependencies: sqflite, Maps_flutter, dio.
 
-Phase 3 - Community Layer: Guardian system, WhatsApp image generator, featured partners.
+Step 2: The Offline-First Engine
+Create a Repository Pattern that checks: SQLite -> Firestore -> API.
 
-6. Open Decisions & Considerations
-Maps Provider: Final choice between Google Maps Platform and Mapbox (based on cost and regional coverage).
+Implement background sync to update SQLite whenever the user has internet.
 
-SMS Verification: Need for low-tech phone number verification in areas with low email usage.
+Step 3: Admin Portal & Branding
+Build the Flutter Web dashboard.
 
-Monetization Integration: Technical design for the "Featured Partner" badges and listings.
-
+Implement the "Share to WhatsApp" feature using the screenshot and share_plus packages to generate dynamic timetable image
